@@ -1,3 +1,7 @@
+Drupal 7.x-1.8 -> Backdrop 1.x-1.x
+
+  Backdrop 1.0 version adopted from Drupal version 7.x-1.8+ from January, 18th, 2015.
+
 7.x-1.7 -> 7.x-1.8
 
   * Phpseclib: Integrated AES with the libraries API. PHPSeclib now preferable to be placed into libraries.

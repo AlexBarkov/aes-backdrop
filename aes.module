@@ -20,7 +20,7 @@ function aes_menu() {
   $items['admin/config/system/aes'] = array(
     'title' => 'AES settings',
     'description' => 'Configure the AES encryption module.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('aes_config'),
     'access arguments' => array('administer aes'),
     'type' => MENU_NORMAL_ITEM,
@@ -84,9 +84,9 @@ function aes_load_phpsec() {
 
 function aes_show_password_page($access, $uid) {
 
-  $viewing_method = variable_get("aes_viewing_method", "collapsible");
+  $viewing_method = variable_get("aes_viewing_method", FALSE);
 
-  if (user_access($access) && aes_password_exists($uid) && ($viewing_method == "page" || $viewing_method == "both")) {
+  if (user_access($access) && aes_password_exists($uid) && $viewing_method) {
     return TRUE;
   }
   return FALSE;
@@ -163,15 +163,13 @@ function aes_config() {
 
   $form['aes']['view_method'] = array(
     '#type' => 'select',
-    '#title' => t('Method for viewing passwords'),
+    '#title' => t('View user passwords'),
     '#options' => array(
-      'collapsible' => t('Collapsible box'),
-      'page' => t('Own page'),
-      'both' => t('Both'),
-      'neither' => t('Neither')
+      1 => t('On'),
+      0 => t('Off')
     ),
-    '#default_value' => variable_get("aes_viewing_method", "collapsible"),
-    '#description' => t('Whether to show the password as a collapsible box on the user info page (collapsed/hidden by default) on a separate page with a tab on the user page, both, or neither.'),
+    '#default_value' => variable_get("aes_viewing_method", 0),
+    '#description' => t('Turn on if you need an ability not only store passwords in the decryptable format but also to view those on user\'s profile page'),
   );
 
   if (variable_get("aes_implementation", "mcrypt") == "phpseclib") {
@@ -393,31 +391,6 @@ function aes_aes_config_change($decrypt_params, $encrypt_params) {
   }
   if (count($accounts)) {
     drupal_set_message(t("Updated the passwords of @updates_num users because of a change in encryption settings.", array('@updates_num' => count($accounts))));
-  }
-}
-
-/**
- * Implements hook_user_view().
- */
-function aes_user_view($account, $view_mode, $langcode) {
-  if (user_access('view passwords') && (variable_get("aes_viewing_method", "page") == "collapsible" || variable_get("aes_viewing_method", "page") == "both") && variable_get("aes_convert", FALSE)) {
-
-    if (aes_password_exists($account->uid)) {
-      $password_form = drupal_get_form('aes_view_password_form', aes_get_password($account->uid, TRUE));
-      $account->content['info']['aes_password'] = array(
-        '#type' => 'user_profile_item',
-        '#title' => t('AES Encryption'),
-        '#markup' => drupal_render($password_form),
-      );
-    }
-    else {
-      $account->content['info']['aes_password'] = array(
-        '#type' => 'user_profile_item',
-        '#title' => t('AES Encryption'),
-        '#markup' => t("This user's password does not yet exist in AES encrypted form."),
-      );
-    }
-
   }
 }
 

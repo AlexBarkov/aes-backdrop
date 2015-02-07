@@ -131,18 +131,3 @@ function aes_uninstall() {
 
   drupal_set_message(t("AES uninstalled."));
 }
-
-/**
- * Convert old setting for aes_convert from string to boolean.
- */
-function aes_update_7100(&$sandbox) {
-  $old_value = variable_get("aes_convert", FALSE);
-  if (is_string($old_value)) {
-    $old_value = strtolower($old_value);
-    $new_value = ($old_value === 'true');
-  }
-  else {
-    $new_value = (bool) $old_value;
-  }
-  variable_set("aes_convert", $new_value);
-}
